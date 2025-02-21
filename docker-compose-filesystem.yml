@@ -19,7 +19,7 @@ services:
     - ./config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     - ./config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
     - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    - /mnt/nas/Mac-files/syslog/grafana:/var/lib/grafana
+    - /Users/enderx/syslog/grafana:/var/lib/grafana
   loki:
     command: -config.file=/etc/loki/loki-config.yml
     container_name: loki
@@ -33,7 +33,7 @@ services:
     restart: always
     volumes:
     - ./config/loki-config-filesystem.yml:/etc/loki/loki-config.yml:ro
-    - /mnt/nas/Mac-files/syslog/loki:/tmp/loki/
+    - /Users/enderx/syslog/loki:/tmp/loki/
   promtail:
     command: -config.file=/etc/promtail/promtail-config.yml
     container_name: promtail
