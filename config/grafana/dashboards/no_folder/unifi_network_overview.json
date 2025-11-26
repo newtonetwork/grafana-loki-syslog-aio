@@ -30,16 +30,16 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
                 "color": "yellow",
-                "value": 1
+                "value": 3
               },
               {
                 "color": "green",
-                "value": 2
+                "value": 5
               }
             ]
           },
@@ -72,7 +72,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(unifi_device_uptime)",
+          "expr": "count(unifi_device_info)",
           "refId": "A"
         }
       ],
@@ -95,8 +95,12 @@
                 "value": null
               },
               {
+                "color": "yellow",
+                "value": 10
+              },
+              {
                 "color": "green",
-                "value": 1
+                "value": 20
               }
             ]
           },
@@ -129,7 +133,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(unifi_device_stat_user_num_sta)",
+          "expr": "count(unifi_client_uptime_seconds)",
           "refId": "A"
         }
       ],
@@ -148,16 +152,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
                 "color": "green",
-                "value": 2
+                "value": null
               }
             ]
           },
@@ -190,7 +186,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(unifi_device_uptime{type=\"uap\"})",
+          "expr": "count(unifi_device_info{type=\"uap\"})",
           "refId": "A"
         }
       ],
@@ -209,16 +205,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
                 "color": "green",
-                "value": 2
+                "value": null
               }
             ]
           },
@@ -251,7 +239,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(unifi_device_uptime{type=\"usw\"})",
+          "expr": "count(unifi_device_info{type=\"usw\"})",
           "refId": "A"
         }
       ],
@@ -270,16 +258,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
                 "color": "green",
-                "value": 2
+                "value": null
               }
             ]
           },
@@ -312,68 +292,11 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(unifi_device_uptime{type=\"ugw\"})",
+          "expr": "count(unifi_device_info{type=\"udm\"})",
           "refId": "A"
         }
       ],
       "title": "Gateways",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 4,
-        "x": 20,
-        "y": 0
-      },
-      "id": 7,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.1.2",
-      "targets": [
-        {
-          "expr": "count(unifi_device_uptime == 0)",
-          "refId": "A"
-        }
-      ],
-      "title": "Offline Devices",
       "type": "stat"
     },
     {
@@ -431,7 +354,7 @@
           {
             "matcher": {
               "id": "byRegexp",
-              "options": ".*rx.*"
+              "options": ".*receive.*"
             },
             "properties": [
               {
@@ -465,17 +388,17 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "rate(unifi_device_stat_bytes_r[5m]) * 8",
-          "legendFormat": "{{name}} - rx",
+          "expr": "rate(unifi_device_lan_receive_bytes_total[5m]) * 8",
+          "legendFormat": "{{name}} - receive",
           "refId": "A"
         },
         {
-          "expr": "rate(unifi_device_stat_bytes_t[5m]) * 8",
-          "legendFormat": "{{name}} - tx",
+          "expr": "rate(unifi_device_lan_transmit_bytes_total[5m]) * 8",
+          "legendFormat": "{{name}} - transmit",
           "refId": "B"
         }
       ],
-      "title": "Device Traffic (RX/TX)",
+      "title": "Device Network Traffic (RX/TX)",
       "type": "timeseries"
     },
     {
@@ -550,7 +473,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_stat_user_num_sta",
+          "expr": "count by (name) (unifi_client_uptime_seconds{name!=\"\"})",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -584,38 +507,6 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "State"
-            },
-            "properties": [
-              {
-                "id": "custom.displayMode",
-                "value": "color-background"
-              },
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "0": {
-                        "color": "red",
-                        "index": 0,
-                        "text": "Offline"
-                      },
-                      "1": {
-                        "color": "green",
-                        "index": 1,
-                        "text": "Online"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
               "options": "Uptime"
             },
             "properties": [
@@ -628,12 +519,48 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Clients"
+              "options": "CPU %"
             },
             "properties": [
               {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
                 "id": "custom.displayMode",
                 "value": "gradient-gauge"
+              },
+              {
+                "id": "max",
+                "value": 1
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Memory %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "gradient-gauge"
+              },
+              {
+                "id": "max",
+                "value": 1
+              },
+              {
+                "id": "min",
+                "value": 0
               }
             ]
           }
@@ -651,23 +578,29 @@
         "sortBy": [
           {
             "desc": false,
-            "displayName": "Device"
+            "displayName": "name"
           }
         ]
       },
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_uptime",
+          "expr": "unifi_device_info",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "unifi_device_stat_user_num_sta",
+          "expr": "unifi_device_cpu_utilization_ratio",
           "format": "table",
           "instant": true,
           "refId": "B"
+        },
+        {
+          "expr": "unifi_device_memory_utilization_ratio",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
         }
       ],
       "title": "Device Status Table",
@@ -684,32 +617,21 @@
               "job": true,
               "instance": true,
               "__name__": true,
-              "site_name": true
+              "site_name": true,
+              "source": true,
+              "id": true,
+              "serial": true,
+              "mac": true
             },
             "indexByName": {},
             "renameByName": {
               "name": "Device",
               "type": "Type",
-              "Value #A": "Uptime",
-              "Value #B": "Clients",
               "model": "Model",
-              "version": "Firmware"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "State",
-            "binary": {
-              "left": "Uptime",
-              "operator": ">",
-              "reducer": "sum",
-              "right": "0"
-            },
-            "mode": "binary",
-            "reduce": {
-              "reducer": "sum"
+              "version": "Firmware",
+              "ip": "IP Address",
+              "Value #B": "CPU %",
+              "Value #C": "Memory %"
             }
           }
         }
@@ -765,7 +687,7 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "percentunit"
         },
         "overrides": []
       },
@@ -792,12 +714,12 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_sys_stats_loadavg_1 * 100",
+          "expr": "unifi_device_cpu_utilization_ratio",
           "legendFormat": "{{name}} - CPU",
           "refId": "A"
         },
         {
-          "expr": "unifi_device_sys_stats_mem_used / unifi_device_sys_stats_mem_total * 100",
+          "expr": "unifi_device_memory_utilization_ratio",
           "legendFormat": "{{name}} - Memory",
           "refId": "B"
         }
@@ -850,7 +772,7 @@
               }
             ]
           },
-          "unit": "celsius"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -865,7 +787,7 @@
         "legend": {
           "calcs": [
             "mean",
-            "max"
+            "last"
           ],
           "displayMode": "table",
           "placement": "bottom"
@@ -877,12 +799,22 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_system_stats_temps",
-          "legendFormat": "{{name}}",
+          "expr": "unifi_device_load_average_1",
+          "legendFormat": "{{name}} - 1min",
           "refId": "A"
+        },
+        {
+          "expr": "unifi_device_load_average_5",
+          "legendFormat": "{{name}} - 5min",
+          "refId": "B"
+        },
+        {
+          "expr": "unifi_device_load_average_15",
+          "legendFormat": "{{name}} - 15min",
+          "refId": "C"
         }
       ],
-      "title": "Device Temperature",
+      "title": "Device Load Average",
       "type": "timeseries"
     },
     {
@@ -930,13 +862,13 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "bps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 28
       },
@@ -948,7 +880,7 @@
             "max"
           ],
           "displayMode": "table",
-          "placement": "bottom"
+          "placement": "right"
         },
         "tooltip": {
           "mode": "multi"
@@ -957,17 +889,17 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_stat_user_wlan_num_sta",
-          "legendFormat": "{{name}} - WLAN",
+          "expr": "rate(unifi_client_transmit_bytes_total[5m]) * 8",
+          "legendFormat": "{{hostname}} - TX",
           "refId": "A"
         },
         {
-          "expr": "unifi_device_stat_user_lan_num_sta",
-          "legendFormat": "{{name}} - LAN",
+          "expr": "rate(unifi_client_receive_bytes_total[5m]) * 8",
+          "legendFormat": "{{hostname}} - RX",
           "refId": "B"
         }
       ],
-      "title": "Wireless vs Wired Clients",
+      "title": "Client Traffic",
       "type": "timeseries"
     },
     {
@@ -975,35 +907,11 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
           "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "never",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "align": "auto",
+            "displayMode": "auto"
           },
           "mappings": [],
           "thresholds": {
@@ -1014,41 +922,140 @@
                 "value": null
               }
             ]
-          },
-          "unit": "none"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Signal (dB)"
+            },
+            "properties": [
+              {
+                "id": "custom.displayMode",
+                "value": "gradient-gauge"
+              },
+              {
+                "id": "unit",
+                "value": "dB"
+              },
+              {
+                "id": "min",
+                "value": -90
+              },
+              {
+                "id": "max",
+                "value": -20
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Uptime"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Satisfaction"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "gradient-gauge"
+              },
+              {
+                "id": "max",
+                "value": 1
+              },
+              {
+                "id": "min",
+                "value": 0
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 28
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 36
       },
       "id": 14,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "table",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi"
-        }
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Uptime"
+          }
+        ]
       },
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "unifi_device_wlan_num_sta",
-          "legendFormat": "{{essid}}",
+          "expr": "unifi_client_uptime_seconds",
+          "format": "table",
+          "instant": true,
           "refId": "A"
+        },
+        {
+          "expr": "unifi_client_rssi_db",
+          "format": "table",
+          "instant": true,
+          "refId": "B"
+        },
+        {
+          "expr": "unifi_client_satisfaction_ratio",
+          "format": "table",
+          "instant": true,
+          "refId": "C"
         }
       ],
-      "title": "Clients per SSID",
-      "type": "timeseries"
+      "title": "Connected Clients",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "job": true,
+              "instance": true,
+              "__name__": true,
+              "site_name": true,
+              "source": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "hostname": "Hostname",
+              "ip": "IP Address",
+              "mac": "MAC",
+              "name": "Connected To",
+              "connection": "Type",
+              "Value #A": "Uptime",
+              "Value #B": "Signal (dB)",
+              "Value #C": "Satisfaction"
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "30s",
@@ -1059,7 +1066,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
