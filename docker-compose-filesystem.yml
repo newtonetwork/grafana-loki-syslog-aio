@@ -33,6 +33,7 @@ services:
     restart: always
     volumes:
     - ./config/loki-config-filesystem.yml:/etc/loki/loki-config.yml:ro
+    - ./config/rules:/etc/loki/rules:ro
     - /Users/enderx/syslog/loki:/tmp/loki/
   promtail:
     command: -config.file=/etc/promtail/promtail-config.yml
@@ -68,4 +69,19 @@ services:
     restart: always
     volumes:
     - ./config/syslog-ng.conf:/etc/syslog-ng/syslog-ng.conf:ro
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    command: "--config.file=/etc/prometheus/prometheus.yml --web.enable-lifecycle"
+    networks:
+      loki: null
+    ports:
+    - protocol: tcp
+      published: 9090
+      target: 9090
+    restart: always
+    volumes:
+    - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - /Users/enderx/syslog/prometheus:/prometheus
 version: '3.3'

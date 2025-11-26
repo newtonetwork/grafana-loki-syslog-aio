@@ -20,3 +20,40 @@ scrape_configs:
   relabel_configs:
     - source_labels: ['__syslog_message_hostname']
       target_label: 'host'
+
+  # Pipeline stages to extract additional labels and parse logs
+  pipeline_stages:
+    # Extract severity level from syslog priority
+    - match:
+        selector: '{job="syslog"}'
+        stages:
+          # Extract facility and severity from syslog message
+          - regex:
+              expression: '(?P<severity>emerg|alert|crit|err|error|warn|warning|notice|info|debug)'
+          - labels:
+              severity:
+
+          # Detect device type based on hostname patterns
+          - regex:
+              expression: '^(?P<device_type>pihole|pi-hole|unifi|dream-machine|nas|synology|truenas|proxmox|pve)'
+              source: host
+          - labels:
+              device_type:
+
+          # Extract service/application name
+          - regex:
+              expression: '(?P<service>sshd|sudo|kernel|systemd|docker|qemu|lxc|pveproxy|dnsmasq|pihole-FTL|unifi|smbd|nfsd|rsync|nginx|apache)'
+          - labels:
+              service:
+
+          # Extract common event types
+          - regex:
+              expression: '(?P<event_type>Failed password|authentication failure|Accepted password|session opened|session closed|error|critical|warning|started|stopped|restarted|crashed)'
+          - labels:
+              event_type:
+
+          # Extract source IP for security events
+          - regex:
+              expression: 'from (?P<source_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+          - labels:
+              source_ip:

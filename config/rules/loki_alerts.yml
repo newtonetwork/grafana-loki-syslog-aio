@@ -1,0 +1,192 @@
+groups:
+  - name: syslog_critical_alerts
+    interval: 1m
+    rules:
+      # SSH Brute Force Detection
+      - alert: SSHBruteForceAttempt
+        expr: |
+          sum(count_over_time({job="syslog"} |~ "Failed password|authentication failure|Invalid user" [5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "SSH brute force attack detected"
+          description: "More than 10 failed SSH authentication attempts detected in the last 5 minutes across all hosts"
+
+      # Disk Space Critical
+      - alert: DiskSpaceCritical
+        expr: |
+          count_over_time({job="syslog"} |~ "(?i)(disk|filesystem|volume).*(full|100%|exceeded|no space)" [5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: storage
+        annotations:
+          summary: "Disk space critical on {{ $labels.host }}"
+          description: "Filesystem has reached critical capacity on {{ $labels.host }}"
+
+      # Service Crashes
+      - alert: ServiceCrashed
+        expr: |
+          count_over_time({job="syslog"} |~ "(?i)(crashed|segfault|panic|core dumped|fatal error)" [10m]) > 2
+        for: 2m
+        labels:
+          severity: critical
+          category: service_health
+        annotations:
+          summary: "Service crashing on {{ $labels.host }}"
+          description: "Service has crashed multiple times in the last 10 minutes on {{ $labels.host }}"
+
+      # Kernel Errors
+      - alert: KernelErrors
+        expr: |
+          count_over_time({job="syslog", service="kernel"} |~ "(?i)(error|critical|oops|bug)" [5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          category: system
+        annotations:
+          summary: "Kernel errors detected on {{ $labels.host }}"
+          description: "Multiple kernel errors detected on {{ $labels.host }}"
+
+  - name: syslog_warning_alerts
+    interval: 2m
+    rules:
+      # Authentication Failures (General)
+      - alert: AuthenticationFailures
+        expr: |
+          sum by (host) (count_over_time({job="syslog"} |~ "(?i)(auth.*fail|denied|rejected|invalid.*user)" [10m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Repeated authentication failures on {{ $labels.host }}"
+          description: "{{ $value }} authentication failures detected on {{ $labels.host }} in the last 10 minutes"
+
+      # RAID/Storage Degraded
+      - alert: RAIDDegraded
+        expr: |
+          count_over_time({job="syslog", device_type=~"nas|synology|truenas"} |~ "(?i)(raid.*degrad|disk.*fail|volume.*warn)" [5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "RAID/Storage degraded on {{ $labels.host }}"
+          description: "Storage array showing degraded status on {{ $labels.host }}"
+
+      # Memory Pressure
+      - alert: MemoryPressure
+        expr: |
+          count_over_time({job="syslog"} |~ "(?i)(oom|out of memory|memory.*critical|swap.*full)" [5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "Memory pressure detected on {{ $labels.host }}"
+          description: "System is experiencing memory pressure on {{ $labels.host }}"
+
+      # Network Issues
+      - alert: NetworkConnectivityIssues
+        expr: |
+          count_over_time({job="syslog"} |~ "(?i)(link.*down|network.*unreachable|timeout|connection.*refused)" [5m]) > 5
+        for: 3m
+        labels:
+          severity: warning
+          category: network
+        annotations:
+          summary: "Network connectivity issues on {{ $labels.host }}"
+          description: "Network problems detected on {{ $labels.host }}"
+
+  - name: device_specific_alerts
+    interval: 2m
+    rules:
+      # Pi-hole Service Issues
+      - alert: PiHoleServiceDown
+        expr: |
+          count_over_time({job="syslog", device_type=~"pihole|pi-hole"} |~ "(?i)(service.*stop|died|not running|FTL.*crash)" [5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: dns
+        annotations:
+          summary: "Pi-hole service issue detected"
+          description: "DNS filtering service may be down on {{ $labels.host }}"
+
+      # Proxmox Cluster Issues
+      - alert: ProxmoxClusterIssue
+        expr: |
+          count_over_time({job="syslog", device_type=~"proxmox|pve"} |~ "(?i)(cluster.*error|quorum.*lost|node.*offline|fencing)" [5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: virtualization
+        annotations:
+          summary: "Proxmox cluster health issue"
+          description: "Cluster communication problems detected on {{ $labels.host }}"
+
+      # Proxmox VM/Container Issues
+      - alert: ProxmoxVMIssues
+        expr: |
+          count_over_time({job="syslog", device_type=~"proxmox|pve"} |~ "(?i)(vm.*error|start.*fail|migration.*fail)" [10m]) > 2
+        for: 3m
+        labels:
+          severity: warning
+          category: virtualization
+        annotations:
+          summary: "Proxmox VM/Container issues on {{ $labels.host }}"
+          description: "Virtual machine or container errors detected on {{ $labels.host }}"
+
+      # UniFi Device Issues
+      - alert: UniFiDeviceDisconnected
+        expr: |
+          count_over_time({job="syslog", device_type=~"unifi|dream-machine"} |~ "(?i)(device.*disconnect|ap.*offline|adopt.*fail)" [5m]) > 0
+        for: 3m
+        labels:
+          severity: warning
+          category: network
+        annotations:
+          summary: "UniFi device connectivity issue"
+          description: "Network device disconnection detected on {{ $labels.host }}"
+
+  - name: security_monitoring
+    interval: 1m
+    rules:
+      # Sudo Command Execution Monitoring
+      - alert: SudoCommandsSpike
+        expr: |
+          sum by (host) (count_over_time({job="syslog", service="sudo"} [10m])) > 20
+        for: 5m
+        labels:
+          severity: info
+          category: security
+        annotations:
+          summary: "Unusual sudo activity on {{ $labels.host }}"
+          description: "{{ $value }} sudo commands executed on {{ $labels.host }} in the last 10 minutes"
+
+      # Failed Sudo Attempts
+      - alert: FailedSudoAttempts
+        expr: |
+          count_over_time({job="syslog", service="sudo"} |~ "(?i)(not allowed|incorrect password|denied)" [10m]) > 3
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Failed sudo attempts on {{ $labels.host }}"
+          description: "Multiple failed privilege escalation attempts detected on {{ $labels.host }}"
+
+      # Multiple Hosts Under Attack
+      - alert: DistributedAuthenticationAttack
+        expr: |
+          count(sum by (host) (count_over_time({job="syslog"} |~ "Failed.*auth|denied.*access" [5m])) > 5) > 2
+        for: 3m
+        labels:
+          severity: critical
+          category: security
+        annotations:
+          summary: "Distributed authentication attack detected"
+          description: "Failed authentication attempts detected across multiple hosts"
