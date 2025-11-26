@@ -125,7 +125,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password|session opened)\" [1h]))",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password)\" != \"cron\" != \"systemd\" [1h]))",
           "refId": "A"
         }
       ],
@@ -462,32 +462,13 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "{job=\"syslog\"} |~ \"(?i)(failed password|bad password|authentication failure|invalid user|nonexistent user)\" != \"kernel\" | regexp \"(?P<source_ip>\\\\b(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}\\\\b)\" | line_format `{{.source_ip}}`",
-          "refId": "A"
+          "expr": "sum by (source_ip) (count_over_time({job=\"syslog\"} |~ \"(?i)(failed password|bad password|authentication failure|invalid user|nonexistent user)\" != \"kernel\" | regexp \"from (?P<source_ip>\\\\b(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}\\\\b)\" [24h]))",
+          "refId": "A",
+          "legendFormat": "{{source_ip}}"
         }
       ],
-      "title": "Failed Auth by Source IP",
-      "transformations": [
-        {
-          "id": "reduce",
-          "options": {
-            "reducers": [
-              "count"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Field": "Source IP",
-              "Count": "Failed Attempts"
-            }
-          }
-        }
-      ],
+      "title": "Failed Auth by Source IP (24h)",
+      "transformations": [],
       "type": "table"
     },
     {
@@ -546,7 +527,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "{job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password|session opened for user)\"",
+          "expr": "{job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password)\" != \"cron\" != \"systemd\"",
           "refId": "A"
         }
       ],

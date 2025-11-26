@@ -55,7 +55,7 @@ ruler:
   storage:
     type: local
     local:
-      directory: /etc/loki/rules
+      directory: /etc/loki/rules/loki
   rule_path: /tmp/loki/rules-temp
   alertmanager_url: http://localhost:9093
   ring:
