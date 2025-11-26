@@ -84,4 +84,25 @@ services:
     volumes:
     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     - /Users/enderx/syslog/prometheus:/prometheus
+
+  unifi-poller:
+    container_name: unifi-poller
+    image: golift/unifi-poller:latest
+    networks:
+      loki: null
+    ports:
+    - protocol: tcp
+      published: 9130
+      target: 9130
+    restart: always
+    volumes:
+    - ./config/unifi-poller.yml:/etc/unifi-poller/up.yml:ro
+    environment:
+      UP_UNIFI_DEFAULT_URL: "https://10.0.2.1"
+      UP_UNIFI_DEFAULT_USER: "unifipoller1828"
+      UP_UNIFI_DEFAULT_PASS: "qitltUBr0Gez+TipRiC4yuwRl"
+      UP_UNIFI_DEFAULT_VERIFY_SSL: "false"
+      UP_INFLUXDB_DISABLE: "true"
+      UP_PROMETHEUS_DISABLE: "false"
+      UP_PROMETHEUS_NAMESPACE: "unifi"
 version: '3.3'

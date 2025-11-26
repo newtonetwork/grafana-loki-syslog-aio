@@ -1,0 +1,48 @@
+# UniFi Poller Configuration
+# This configuration file allows UniFi Poller to collect metrics from your UniFi Controller
+# Metrics are exposed on port 9130 for Prometheus to scrape
+
+poller:
+  # How often to poll the controller for metrics (in seconds)
+  interval: "30s"
+  # Enable debug logging
+  debug: false
+  # Quiet mode - reduce log output
+  quiet: false
+
+prometheus:
+  # Disable Prometheus output (we want this enabled)
+  disable: false
+  # HTTP listener for metrics endpoint
+  http_listen: "0.0.0.0:9130"
+  # Metrics namespace
+  namespace: "unifi"
+
+influxdb:
+  # We're not using InfluxDB, so disable it
+  disable: true
+
+unifi:
+  # UniFi Controller configuration
+  dynamic: false
+  defaults:
+    # Controller role - can be used to group controllers
+    role: "main"
+    # URL to UniFi Controller
+    url: "https://10.0.2.1"
+    # Username for authentication
+    user: "unifipoller1828"
+    # Password for authentication
+    pass: "qitltUBr0Gez+TipRiC4yuwRl"
+    # Disable SSL verification (for self-signed certs)
+    verify_ssl: false
+    # Save data for these types of devices
+    save_sites: true
+    save_ids: true
+    save_dpi: true
+    save_alarms: true
+    save_anomalies: true
+    save_events: false
+    save_rogue: true
+    # Hash PII (personally identifiable information) like MAC addresses
+    hash_pii: false
