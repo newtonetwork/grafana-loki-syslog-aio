@@ -125,7 +125,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(accepted|succeeded|successful)\" |~ \"(?i)(ssh|login|authentication)\" [1h]))",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(accepted|succeeded|successful)\" |~ \"(?i)(ssh|login|authentication|password auth|dropbear)\" [1h]))",
           "refId": "A"
         }
       ],
@@ -325,8 +325,8 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed|failure|invalid)\" [$__interval])) by (device_type)",
-          "legendFormat": "{{device_type}}",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed|failure|invalid|authentication failure)\" [$__interval])) by (host)",
+          "legendFormat": "{{host}}",
           "refId": "A"
         }
       ],
@@ -546,7 +546,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "{job=\"syslog\"} |~ \"(?i)(accepted|succeeded)\" |~ \"(?i)(ssh|login)\"",
+          "expr": "{job=\"syslog\"} |~ \"(?i)(accepted|succeeded)\" |~ \"(?i)(ssh|login|password auth|dropbear)\"",
           "refId": "A"
         }
       ],
