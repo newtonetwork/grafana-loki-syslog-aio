@@ -72,7 +72,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed|failure|invalid|authentication failure)\" [1h]))",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed password|bad password|authentication failure|invalid user|nonexistent user)\" [1h]))",
           "refId": "A"
         }
       ],
@@ -125,7 +125,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(accepted|succeeded|successful)\" |~ \"(?i)(ssh|login|authentication|password auth|dropbear)\" [1h]))",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password|session opened)\" [1h]))",
           "refId": "A"
         }
       ],
@@ -186,11 +186,11 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "count(changes(unifi_client_uptime_seconds[1h]) > 0)",
+          "expr": "count(unifi_client_uptime_seconds < 3600)",
           "refId": "A"
         }
       ],
-      "title": "New Network Connections (1h)",
+      "title": "Recent Connections (<1h old)",
       "type": "stat"
     },
     {
@@ -325,7 +325,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed|failure|invalid|authentication failure)\" [$__interval])) by (host)",
+          "expr": "sum(count_over_time({job=\"syslog\"} |~ \"(?i)(failed password|bad password|authentication failure|invalid user|nonexistent user)\" [$__interval])) by (host)",
           "legendFormat": "{{host}}",
           "refId": "A"
         }
@@ -462,7 +462,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "{job=\"syslog\"} |~ \"(?i)(failed password|authentication failure|invalid user)\" != \"kernel\" | regexp \"(?P<source_ip>\\\\b(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}\\\\b)\" | line_format `{{.source_ip}}`",
+          "expr": "{job=\"syslog\"} |~ \"(?i)(failed password|bad password|authentication failure|invalid user|nonexistent user)\" != \"kernel\" | regexp \"(?P<source_ip>\\\\b(?:[0-9]{1,3}\\\\.){3}[0-9]{1,3}\\\\b)\" | line_format `{{.source_ip}}`",
           "refId": "A"
         }
       ],
@@ -546,7 +546,7 @@
       "pluginVersion": "8.1.2",
       "targets": [
         {
-          "expr": "{job=\"syslog\"} |~ \"(?i)(accepted|succeeded)\" |~ \"(?i)(ssh|login|password auth|dropbear)\"",
+          "expr": "{job=\"syslog\"} |~ \"(?i)(password auth succeeded|accepted publickey|accepted password|session opened for user)\"",
           "refId": "A"
         }
       ],
