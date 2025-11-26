@@ -83,6 +83,7 @@ services:
     restart: always
     volumes:
     - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    - ./config/rules:/etc/prometheus/rules:ro
     - /Users/enderx/syslog/prometheus:/prometheus
 
   unifi-poller:

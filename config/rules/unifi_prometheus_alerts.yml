@@ -1,0 +1,169 @@
+groups:
+  - name: unifi_device_health
+    interval: 1m
+    rules:
+      # UniFi Device Offline
+      - alert: UniFiDeviceOffline
+        expr: |
+          unifi_device_uptime_seconds == 0
+        for: 3m
+        labels:
+          severity: critical
+          category: network
+        annotations:
+          summary: "UniFi device {{ $labels.name }} is offline"
+          description: "Device {{ $labels.name }} ({{ $labels.type }}) at {{ $labels.ip }} has been offline for more than 3 minutes"
+
+      # High CPU Usage on UniFi Devices
+      - alert: UniFiDeviceHighCPU
+        expr: |
+          unifi_device_cpu_utilization_ratio > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High CPU usage on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} has CPU utilization above 85% (current: {{ $value | humanizePercentage }})"
+
+      # High Memory Usage on UniFi Devices
+      - alert: UniFiDeviceHighMemory
+        expr: |
+          unifi_device_memory_utilization_ratio > 0.90
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "High memory usage on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} has memory utilization above 90% (current: {{ $value | humanizePercentage }})"
+
+      # Device Recently Rebooted
+      - alert: UniFiDeviceRecentReboot
+        expr: |
+          unifi_device_uptime_seconds < 600
+        for: 2m
+        labels:
+          severity: info
+          category: network
+        annotations:
+          summary: "{{ $labels.name }} recently rebooted"
+          description: "Device {{ $labels.name }} has been online for less than 10 minutes (uptime: {{ $value }}s)"
+
+  - name: unifi_wireless_health
+    interval: 2m
+    rules:
+      # Access Point High Client Count
+      - alert: UniFiAPHighClientCount
+        expr: |
+          count by (name) (unifi_client_uptime_seconds{name!=""}) > 30
+        for: 5m
+        labels:
+          severity: warning
+          category: capacity
+        annotations:
+          summary: "High client count on {{ $labels.name }}"
+          description: "Access Point {{ $labels.name }} has more than 30 connected clients"
+
+      # Low WiFi Signal Clients
+      - alert: UniFiLowSignalClients
+        expr: |
+          count(unifi_client_rssi_db < -75) > 3
+        for: 5m
+        labels:
+          severity: warning
+          category: wifi_quality
+        annotations:
+          summary: "Multiple clients with poor WiFi signal"
+          description: "{{ $value }} clients have signal strength below -75 dBm, consider adding more access points or adjusting placement"
+
+      # Client Satisfaction Issues
+      - alert: UniFiLowClientSatisfaction
+        expr: |
+          count(unifi_client_satisfaction_ratio < 0.5) > 2
+        for: 5m
+        labels:
+          severity: warning
+          category: wifi_quality
+        annotations:
+          summary: "Multiple clients with low satisfaction scores"
+          description: "{{ $value }} clients have satisfaction scores below 50%, check for interference or capacity issues"
+
+  - name: unifi_network_issues
+    interval: 1m
+    rules:
+      # High Client Disconnection Rate
+      - alert: UniFiHighDisconnectionRate
+        expr: |
+          sum(rate(unifi_client_roam_count_total[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          category: network
+        annotations:
+          summary: "High client roaming/disconnection rate"
+          description: "Clients are roaming or disconnecting frequently ({{ $value }} roams/sec), check for coverage or interference issues"
+
+      # Device Transmit Errors
+      - alert: UniFiDeviceTransmitErrors
+        expr: |
+          rate(unifi_device_lan_transmit_dropped_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: network
+        annotations:
+          summary: "High transmit errors on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} is dropping packets ({{ $value }} drops/sec)"
+
+      # Device Receive Errors
+      - alert: UniFiDeviceReceiveErrors
+        expr: |
+          rate(unifi_device_lan_receive_dropped_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: network
+        annotations:
+          summary: "High receive errors on {{ $labels.name }}"
+          description: "Device {{ $labels.name }} is dropping inbound packets ({{ $value }} drops/sec)"
+
+  - name: unifi_anomaly_detection
+    interval: 2m
+    rules:
+      # Unusual Number of Clients
+      - alert: UniFiUnusualClientCount
+        expr: |
+          (count(unifi_client_uptime_seconds) - avg_over_time(count(unifi_client_uptime_seconds)[1h:5m]))
+          / avg_over_time(count(unifi_client_uptime_seconds)[1h:5m]) > 0.5
+        for: 10m
+        labels:
+          severity: info
+          category: anomaly
+        annotations:
+          summary: "Unusual number of connected clients"
+          description: "Current client count is 50% higher than the 1-hour average, possible event or issue"
+
+      # Rapid Client Connections
+      - alert: UniFiRapidClientConnections
+        expr: |
+          count(unifi_client_uptime_seconds < 120) > 10
+        for: 5m
+        labels:
+          severity: info
+          category: anomaly
+        annotations:
+          summary: "Many new client connections"
+          description: "{{ $value }} clients connected in the last 2 minutes, possible event or gathering"
+
+      # Client Transmit Retry Storm
+      - alert: UniFiClientRetryStorm
+        expr: |
+          sum(rate(unifi_client_transmit_retries_total[5m])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          category: wifi_quality
+        annotations:
+          summary: "High WiFi retry rate detected"
+          description: "Clients are experiencing high retry rates ({{ $value }} retries/sec), check for interference or capacity issues"
